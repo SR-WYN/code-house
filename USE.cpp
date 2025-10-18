@@ -72,6 +72,10 @@ signed main()
 			cin>>num[i];
 		}
 		show(num,n);
-		
+		for (int i=1;i<=n;i++)
+		{
+			sort(num+i,num+i+n);
+		}
+		show(num,n);
 	}
 }
