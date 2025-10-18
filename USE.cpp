@@ -71,10 +71,5 @@ signed main()
 		{
 			cin>>num[i];
 		}
-		sort(num+1,num+n+1);
-		for (int i=1;i<=n;i++)
-		{
-			cout<<num[i]<<' ';
-		}
 	}
 }
