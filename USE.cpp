@@ -71,5 +71,7 @@ signed main()
 		{
 			cin>>num[i];
 		}
+		show(num,n);
+		
 	}
 }
