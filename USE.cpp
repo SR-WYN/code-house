@@ -3,95 +3,36 @@ using namespace std;
 #define int long long
 typedef pair<int, int> PII;
 constexpr int mod = 1e9 + 7;
-constexpr int N = 2e5 + 10;
+constexpr int N = 4e5 + 10;
 int n, m;
-void show(int num[], int len)
+struct node
 {
-	for (int i = 1; i <= len; i++)
+	int a, b;
+	bool operator<(const node &x) const
 	{
-		cout << num[i] << ' ';
+		return b > x.b;
 	}
-	cout << '\n';
-}
-int base[N];
-vector<int> p;
-bitset<N> prim;
-void get_prim()
+};
+node num[N];
+int lowbit(int x)
 {
-	prim[1] = true;
-	for (int i = 2; i < N; i++)
+	return x & (-x);
+}
+int tree[N];
+int cnt[N];
+void add(int x, int v)
+{
+	for (int pos = x; pos < N; pos += lowbit(pos))
 	{
-		if (!prim[i])
-		{
-			p.push_back(i);
-			base[i] = i;
-		}
-		for (auto j : p)
-		{
-			if (j * i >= N)
-			{
-				break;
-			}
-			prim[j * i] = true;
-			base[j * i] = j;
-			if (i % j == 0)
-			{
-				break;
-			}
-		}
+		tree[pos] += v;
 	}
 }
-int qpow(int a, int b)
+int query(int x)
 {
-	int ans = 1;
-	while (b)
+	int ans = 0;
+	for (int pos = x; pos; pos -= lowbit(pos))
 	{
-		if (b & 1)
-		{
-			ans = ans * a % mod;
-		}
-		a = a * a % mod;
-		b >>= 1;
-	}
-	return ans;
-}
-int num[N];
-int dp[N];
-int get_small(int l, int r, int k)
-{
-	int ans = 0x3f3f3f3f;
-	r += k;
-	while (l != r)
-	{
-		if (dp[l-k] >= 0)
-		{
-			dp[l] = num[l];
-		}
-		else
-		{
-			dp[l] = num[l] + dp[l-k];
-		}
-		ans = min(ans, dp[l]);
-		l += k;
-	}
-	return ans;
-}
-int get_big(int l, int r, int k)
-{
-	int ans = -0x3f3f3f3f;
-	r += k;
-	while (l != r)
-	{
-		if (dp[l-k] <= 0)
-		{
-			dp[l] = num[l];
-		}
-		else
-		{
-			dp[l] = dp[l-k]+num[l];
-		}
-		ans = max(ans, dp[l]);
-		l += k;
+		ans += tree[pos];
 	}
 	return ans;
 }
@@ -100,105 +41,69 @@ signed main()
 	ios::sync_with_stdio(false);
 	cin.tie(0);
 	cout.tie(0);
+	// get_prim();
 	int t = 1;
 	cin >> t;
 	while (t--)
 	{
-		cin >> n;
-		int id = 0;
+		unordered_map<int, int> mp;
+		cin >> n >> m;
+		int tot = 0;
 		for (int i = 1; i <= n; i++)
 		{
-			cin >> num[i];
-			if (num[i] != 1 && num[i] != -1)
-			{
-				id = i;
-			}
-		}
-		if (!id)
-		{
-			int small = get_small(1, n, 1);
-			int big = get_big(1, n, 1);
-			//cout<<small<<' '<<big<<'\n';
-			set<int>s;
-			while (small<=big)
-			{
-				s.insert(small);
-				s.insert(big);
-				small++;
-				big--;
-			}
-			s.insert(0);
-			cout << s.size() << '\n';
-			for (auto i : s)
-			{
-				cout << i << ' ';
-			}
-			cout << '\n';
-		}
-		else
-		{
-			int sl = get_small(id - 1, 1, -1);
-			int bl = get_big(id - 1, 1, -1);
-			int sr = get_small(id + 1, n, 1);
-			int br = get_big(id + 1, n, 1);
-			//cout<<sl<<' '<<bl<<' '<<sr<<' '<<br<<'\n';
-			set<int> s;
-			s.insert(num[id]);
-			s.insert(0);
-			while (sl <= bl)
-			{
-				s.insert(sl);
-				sl++;
-			}
-			while (sr <= br)
-			{
-				s.insert(sr);
-				sr++;
-			}
-			dp[id]=0;
-			sl = 0x3f3f3f3f, bl = -0x3f3f3f3f;
-			for (int i = id - 1; i >= 1; i--)
-			{
-				dp[i] = num[i] + dp[i + 1];
-				sl = min(sl, dp[i]);
-				bl = max(bl, dp[i]);
-			}
-			sr = 0x3f3f3f3f, br = -0x3f3f3f3f;
-			for (int i = id + 1; i <= n; i++)
-			{
-				dp[i] = num[i] + dp[i - 1];
-				sr = min(sr, dp[i]);
-				br = max(br, dp[i]);
-			}
-			int small = sl + sr + num[id];
-			int big = bl + br + num[id];
-			while (sl<=bl)
-			{
-				s.insert(sl+num[id]);
-				sl++;
-			}
-			while (sr<=br)
-			{
-				s.insert(sr+num[id]);
-				sr++;
-			}
-			while (small <= big)
-			{
-				s.insert(small);
-				s.insert(big);
-				small++;
-				big--;
-			}
-			cout << s.size() << '\n';
-			for (auto i : s)
-			{
-				cout << i << ' ';
-			}
-			cout << '\n';
+			cin >> num[i].a;
+			cnt[++tot] = num[i].a;
 		}
 		for (int i = 1; i <= n; i++)
 		{
-			dp[i] = 0;
+			cin >> num[i].b;
+			cnt[++tot] = num[i].b;
+		}
+		sort(num + 1, num + n + 1);
+		sort(cnt + 1, cnt + 1 + tot);
+		tot = unique(cnt + 1, cnt + 1 + tot) - cnt - 1;
+		for (int i = 1; i <= n; i++)
+		{
+			mp[num[i].a] = lower_bound(cnt + 1, cnt + 1 + tot, num[i].a) - cnt;
+			mp[num[i].b] = lower_bound(cnt + 1, cnt + 1 + tot, num[i].b) - cnt;
+			// cout<<mp[num[i].a]<<'\n';
+		}
+		priority_queue<int> pr;
+		int ans = 0;
+		for (int i = 1; i <= n; i++)
+		{
+			while (pr.size() && pr.top() > num[i].b)
+			{
+				int now = pr.top();
+				pr.pop();
+				if (query(mp[now] - 1) > m)
+				{
+					continue;
+				}
+				ans = max(ans, now * (i - 1));
+			}
+			add(mp[num[i].a], 1);
+			pr.push(num[i].a);
+			if (query(mp[num[i].b] - 1) <= m)
+			{
+				ans = max(ans, num[i].b * i);
+			}
+		}
+		while (pr.size())
+		{
+			int now = pr.top();
+			pr.pop();
+			if (query(mp[now] - 1) > m)
+			{
+				continue;
+			}
+			ans = max(ans, now * n);
+			break;
+		}
+		cout << ans << '\n';
+		for (int i = 1; i <= n; i++)
+		{
+			add(mp[num[i].a], -1);
 		}
 	}
 }
